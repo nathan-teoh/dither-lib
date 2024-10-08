@@ -1,6 +1,6 @@
-use std::borrow::Borrow;
-
-use image::{imageops::FilterType, DynamicImage, Rgb};
+//re-export `image`'s `Rgb<_>` struct
+pub use image::Rgb;
+use image::{imageops::FilterType, DynamicImage};
 use ndarray::{arr2, concatenate, Array2, Axis};
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
 

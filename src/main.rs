@@ -1,6 +1,8 @@
 use dither::{DitherBuilder, Resize};
-use image::{ImageReader, Rgb};
+use image::ImageReader;
 mod dither;
+// Use the re-exported `Rgb`
+use dither::Rgb;
 fn main() {
     let filename = "input.jpg";
 
