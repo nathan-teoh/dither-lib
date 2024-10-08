@@ -7,7 +7,7 @@ const G_CHANNEL_MULTIPLIER: f64 = 0.7152;
 const B_CHANNEL_MULTIPLIER: f64 = 0.0722;
 
 pub struct DitherImage {
-    image: DynamicImage,
+    pub image: DynamicImage,
 }
 
 pub struct DitherBuilder {
@@ -20,10 +20,12 @@ pub struct DitherBuilder {
 }
 impl DitherImage {
     pub fn new(image: DynamicImage) -> DitherBuilder {
+        let width = image.width();
+        let height = image.height();
         DitherBuilder {
             image,
-            width: 0,
-            height: 0,
+            width: width,
+            height: height,
             shadows: (0, 0, 0),
             highlights: (255, 255, 255),
             level: 2,
@@ -63,8 +65,7 @@ impl DitherBuilder {
         let num = 2_u8.pow(self.level.into());
         let equalizer = 1. / (num as f32).powf(2.);
         //generate bayer layer
-        let bayer_layer = generate_bayer(self.level);
-        let bayer_layer = bayer_layer.mapv(|x| (x as f32) * equalizer);
+        let bayer_layer = generate_bayer(self.level).mapv(|x| (x as f32) * equalizer);
         //convert to grayscale
         let image = self.image.grayscale();
         //resize image
