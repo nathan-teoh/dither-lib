@@ -1,3 +1,16 @@
+//! This is a simple dithering library
+//!
+//! # Usage
+//! ```rust
+//! pub fn main(){
+//! let image: DynamicImage = todo!();
+//! let dithered_image = DitherBuilder::new(image)
+//!     .highlights(Rgb([255;3]))
+//!     .shadows(Rgb([0;3]))
+//!     .resize(Resize::Scale(0.5))
+//!     .generate();
+//!}
+//!```
 //re-export `image`'s `Rgb<_>` struct
 pub use image::Rgb;
 use image::{imageops::FilterType, DynamicImage};
@@ -7,6 +20,8 @@ use rayon::iter::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelI
 const R_CHANNEL_MULTIPLIER: f64 = 0.2126;
 const G_CHANNEL_MULTIPLIER: f64 = 0.7152;
 const B_CHANNEL_MULTIPLIER: f64 = 0.0722;
+
+/// Dithered image builder
 pub struct DitherBuilder {
     image: DynamicImage,
     level: u8,
@@ -16,6 +31,7 @@ pub struct DitherBuilder {
     highlights: Rgb<u8>,
 }
 impl DitherBuilder {
+    /// Initializes a new `DitherBuilder`
     pub fn new(image: DynamicImage) -> DitherBuilder {
         let width = image.width();
         let height = image.height();
@@ -29,17 +45,19 @@ impl DitherBuilder {
         }
     }
 }
+
 pub enum Resize {
     Scale(f32),
     Resolution { width: u32, height: u32 },
 }
 
 impl DitherBuilder {
+    /// Sets the dithering level
     pub fn level(mut self, level: u8) -> Self {
         self.level = level;
         self
     }
-
+    /// Resizes the output image
     pub fn resize(mut self, resize: Resize) -> Self {
         match resize {
             Resize::Scale(scale) => {
@@ -54,17 +72,17 @@ impl DitherBuilder {
         self
     }
 
-    // Sets the color of highlights in the dithered image
+    /// Sets the color of highlights in the dithered image
     pub fn highlights(mut self, highlights: Rgb<u8>) -> Self {
         self.highlights = highlights;
         self
     }
-    // Sets the color of the shadows in the dithered image
+    /// Sets the color of the shadows in the dithered image
     pub fn shadows(mut self, shadows: Rgb<u8>) -> Self {
         self.shadows = shadows;
         self
     }
-    // Generate a dithered image given a set of parameters and returns a DynamicImage
+    /// Generate a dithered image given a set of parameters and returns a DynamicImage
     pub fn generate(self) -> DynamicImage {
         //generate equalizer
         let num = 2_u8.pow(self.level.into());
