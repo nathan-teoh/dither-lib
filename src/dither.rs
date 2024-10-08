@@ -2,6 +2,10 @@ use image::{imageops::FilterType, DynamicImage};
 use ndarray::{arr2, concatenate, Array2, Axis};
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
 
+const R_CHANNEL_MULTIPLIER: f64 = 0.2126;
+const G_CHANNEL_MULTIPLIER: f64 = 0.7152;
+const B_CHANNEL_MULTIPLIER: f64 = 0.0722;
+
 pub struct DitherImage {
     image: DynamicImage,
 }
@@ -17,7 +21,7 @@ pub struct DitherBuilder {
 impl DitherImage {
     pub fn new(image: DynamicImage) -> DitherBuilder {
         DitherBuilder {
-            image: image,
+            image,
             width: 0,
             height: 0,
             shadows: (0, 0, 0),
@@ -75,18 +79,14 @@ impl DitherBuilder {
                 let g = pixel[1] as f64 / 255.;
                 let b = pixel[2] as f64 / 255.;
 
-                let mut br = r * 0.2126 + g * 0.7152 + b * 0.0722;
+                let pixel_brightness =
+                    r * R_CHANNEL_MULTIPLIER + g * G_CHANNEL_MULTIPLIER + b * B_CHANNEL_MULTIPLIER;
                 let bayer_len = bayer_layer.shape()[0];
                 let x = x.rem_euclid(bayer_len.try_into().unwrap()) as usize;
                 let y = y.rem_euclid(bayer_len.try_into().unwrap()) as usize;
-                br = {
-                    if br <= 0.0405 {
-                        br / 12.92
-                    } else {
-                        ((br + 0.055 / 1.055).powf(2.4))
-                    }
-                };
-                if br > (1. - bayer_layer[[y, x]]).into() {
+
+                let pixel_brightness = gamma_correct(pixel_brightness);
+                if pixel_brightness > (1. - bayer_layer[[y, x]]).into() {
                     pixel[0] = self.highlights.0;
                     pixel[1] = self.highlights.1;
                     pixel[2] = self.highlights.2;
@@ -126,5 +126,13 @@ fn generate_bayer(level: u8) -> Array2<i32> {
                 ]
             ]
         }
+    }
+}
+
+fn gamma_correct(pixel_brightness: f64) -> f64 {
+    if pixel_brightness <= 0.0405 {
+        pixel_brightness / 12.92
+    } else {
+        (pixel_brightness + 0.055 / 1.055).powf(2.4)
     }
 }
