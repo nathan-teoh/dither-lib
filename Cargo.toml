@@ -1,6 +1,6 @@
 [package]
 name = "dither-lib"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Simple image dithering library"
 license = "MIT"
