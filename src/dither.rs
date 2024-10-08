@@ -7,14 +7,13 @@ use rayon::iter::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelI
 const R_CHANNEL_MULTIPLIER: f64 = 0.2126;
 const G_CHANNEL_MULTIPLIER: f64 = 0.7152;
 const B_CHANNEL_MULTIPLIER: f64 = 0.0722;
-
 pub struct DitherBuilder {
     image: DynamicImage,
     level: u8,
     width: u32,
     height: u32,
-    shadows: (u8, u8, u8),
-    highlights: (u8, u8, u8),
+    shadows: Rgb<u8>,
+    highlights: Rgb<u8>,
 }
 impl DitherBuilder {
     pub fn new(image: DynamicImage) -> DitherBuilder {
@@ -24,8 +23,8 @@ impl DitherBuilder {
             image,
             width,
             height,
-            shadows: (0, 0, 0),
-            highlights: (255, 255, 255),
+            shadows: Rgb([0; 3]),
+            highlights: Rgb([255; 3]),
             level: 2,
         }
     }
@@ -55,23 +54,13 @@ impl DitherBuilder {
         self
     }
 
-    // // Sets the width of the output image
-    // pub fn width(mut self, width: u32) -> Self {
-    //     self.width = width;
-    //     self
-    // }
-    // // Sets the height of the output image
-    // pub fn height(mut self, height: u32) -> Self {
-    //     self.height = height;
-    //     self
-    // }
     // Sets the color of highlights in the dithered image
-    pub fn highlights(mut self, highlights: (u8, u8, u8)) -> Self {
+    pub fn highlights(mut self, highlights: Rgb<u8>) -> Self {
         self.highlights = highlights;
         self
     }
     // Sets the color of the shadows in the dithered image
-    pub fn shadows(mut self, shadows: (u8, u8, u8)) -> Self {
+    pub fn shadows(mut self, shadows: Rgb<u8>) -> Self {
         self.shadows = shadows;
         self
     }
@@ -121,10 +110,10 @@ fn pixel_brightness(pixel: &Rgb<u8>) -> f64 {
     gamma_correct(pixel_brightness)
 }
 
-fn set_pixel(pixel: &mut Rgb<u8>, color: (u8, u8, u8)) {
-    pixel[0] = color.0;
-    pixel[1] = color.1;
-    pixel[2] = color.2;
+fn set_pixel(pixel: &mut Rgb<u8>, color: Rgb<u8>) {
+    pixel[0] = color[0];
+    pixel[1] = color[1];
+    pixel[2] = color[2];
 }
 
 fn generate_bayer(level: u8) -> Array2<i32> {
