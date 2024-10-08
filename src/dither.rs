@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+
 use image::{imageops::FilterType, DynamicImage, Rgb};
 use ndarray::{arr2, concatenate, Array2, Axis};
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefMutIterator, ParallelIterator};
@@ -72,17 +74,10 @@ impl DitherBuilder {
             .par_iter_mut()
             .enumerate()
             .for_each(|(_, (x, y, pixel))| {
-                let r = pixel[0] as f64 / 255.;
-                let g = pixel[1] as f64 / 255.;
-                let b = pixel[2] as f64 / 255.;
-
-                let pixel_brightness =
-                    r * R_CHANNEL_MULTIPLIER + g * G_CHANNEL_MULTIPLIER + b * B_CHANNEL_MULTIPLIER;
                 let bayer_len = bayer_layer.shape()[0];
                 let x = x.rem_euclid(bayer_len.try_into().unwrap()) as usize;
                 let y = y.rem_euclid(bayer_len.try_into().unwrap()) as usize;
-
-                let pixel_brightness = gamma_correct(pixel_brightness);
+                let pixel_brightness = pixel_brightness(pixel);
                 if pixel_brightness > (1. - bayer_layer[[y, x]]).into() {
                     set_pixel(*pixel, self.highlights);
                 } else {
@@ -96,6 +91,16 @@ impl DitherBuilder {
         }
         DynamicImage::ImageRgb8(new_img_buffer)
     }
+}
+
+fn pixel_brightness(pixel: &Rgb<u8>) -> f64 {
+    let r = pixel[0] as f64 / 255.;
+    let g = pixel[1] as f64 / 255.;
+    let b = pixel[2] as f64 / 255.;
+
+    let pixel_brightness =
+        r * R_CHANNEL_MULTIPLIER + g * G_CHANNEL_MULTIPLIER + b * B_CHANNEL_MULTIPLIER;
+    gamma_correct(pixel_brightness)
 }
 
 fn set_pixel(pixel: &mut Rgb<u8>, color: (u8, u8, u8)) {
