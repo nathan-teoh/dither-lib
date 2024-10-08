@@ -30,6 +30,10 @@ impl DitherBuilder {
         }
     }
 }
+pub enum Resize {
+    Scale(f32),
+    Resolution { width: u32, height: u32 },
+}
 
 impl DitherBuilder {
     pub fn level(mut self, level: u8) -> Self {
@@ -37,16 +41,30 @@ impl DitherBuilder {
         self
     }
 
-    // Sets the width of the output image
-    pub fn width(mut self, width: u32) -> Self {
-        self.width = width;
+    pub fn resize(mut self, resize: Resize) -> Self {
+        match resize {
+            Resize::Scale(scale) => {
+                self.width = (scale * self.width as f32) as u32;
+                self.height = (scale * self.height as f32) as u32;
+            }
+            Resize::Resolution { width, height } => {
+                self.width = width;
+                self.height = height;
+            }
+        };
         self
     }
-    // Sets the height of the output image
-    pub fn height(mut self, height: u32) -> Self {
-        self.height = height;
-        self
-    }
+
+    // // Sets the width of the output image
+    // pub fn width(mut self, width: u32) -> Self {
+    //     self.width = width;
+    //     self
+    // }
+    // // Sets the height of the output image
+    // pub fn height(mut self, height: u32) -> Self {
+    //     self.height = height;
+    //     self
+    // }
     // Sets the color of highlights in the dithered image
     pub fn highlights(mut self, highlights: (u8, u8, u8)) -> Self {
         self.highlights = highlights;

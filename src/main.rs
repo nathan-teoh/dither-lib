@@ -1,4 +1,4 @@
-use dither::DitherBuilder;
+use dither::{DitherBuilder, Resize};
 use image::ImageReader;
 mod dither;
 fn main() {
@@ -9,6 +9,7 @@ fn main() {
     let dither_image = DitherBuilder::new(image_file)
         .highlights((255, 255, 255))
         .shadows((0, 0, 0))
+        // .resize(Resize::Scale(0.5))
         .generate();
-    dither_image.save("output.jpg").unwrap();
+    dither_image.save("output2.jpg").unwrap();
 }
