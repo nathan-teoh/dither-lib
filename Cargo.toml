@@ -2,6 +2,11 @@
 name = "dither-lib"
 version = "0.1.0"
 edition = "2021"
+description = "Simple image dithering library"
+license = "MIT"
+homepage = "https://github.com/nathan-teoh/dither-lib"
+repository = "https://github.com/nathan-teoh/dither-lib"
+readme = false
 
 [dependencies]
 image = "0.25.2"
