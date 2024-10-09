@@ -2,14 +2,17 @@
 //!
 //! # Usage
 //! ```rust
-//! pub fn main(){
-//! let image: DynamicImage = todo!();
-//! let dithered_image = DitherBuilder::new(image)
-//!     .highlights(Rgb([255;3]))
-//!     .shadows(Rgb([0;3]))
-//!     .resize(Resize::Scale(0.5))
-//!     .generate();
-//!}
+//!# use image::DynamicImage;
+//!# use dither_lib::{DitherBuilder,Rgb,Resize};
+//!# pub fn main(){
+//!     // Obviously this will not work...
+//!     let image: DynamicImage = DynamicImage::default();
+//!     let dithered_image = DitherBuilder::new(image)
+//!         .highlights(Rgb([255;3]))
+//!         .shadows(Rgb([0;3]))
+//!         .resize(Resize::Scale(0.5))
+//!         .generate();
+//!# }
 //!```
 //re-export `image`'s `Rgb<_>` struct
 pub use image::Rgb;
